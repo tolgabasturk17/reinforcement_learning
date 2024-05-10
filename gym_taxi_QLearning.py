@@ -29,7 +29,7 @@ for i in range(1,episode_number):
 
         # exploit vs explore to find action
         # %10 = explore, %90 exploit
-        if random.uniform(0.1) < epsilon:
+        if random.uniform(0,1) < epsilon:
             action = env.action_space.sample()
         else:
             action = np.argmax(q_table[state])
