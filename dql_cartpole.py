@@ -42,7 +42,7 @@ if __name__ == "__main__":
     for e in range(episodes):
 
         # initialize environment
-        state = env.reset()
+        state, _ = env.reset()
 
         state = np.reshape(state, (1,-1))
         time = 0
