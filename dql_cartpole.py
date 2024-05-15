@@ -10,7 +10,19 @@ class DQLAgent:
 
     def __init__(self, env):
         # parameters / hyper parameters
-        pass
+        self.state_size = env.observation_space.shape[0]
+        self.action_size = env.action_space.n
+
+        self.gamma = 0.95
+        self.learning_rate = 0.001
+
+        self.epsilon = 1
+        self.epsilon_decay = 0.995
+        self.epsilon_min = 0.01
+
+        self.memory = deque(maxlen=1000)
+
+        self.model = self.build_model()
 
     def build_model(self):
         # neural network for deep q learning
@@ -18,7 +30,7 @@ class DQLAgent:
 
     def remember(self, state, action, reward, next_state, done):
         # storage
-        pass
+        self.memory.append(state, action, reward, next_state, done)
 
     def act(self, state):
         # acting explore or explotation
@@ -29,8 +41,10 @@ class DQLAgent:
         pass
 
     def adaptiveEGreedy(self):
-        pass
+        if self.epsilon > self.epsilon_min:
+            self.epsilon = self.epsilon * self.epsilon_decay
 
+#main method
 if __name__ == "__main__":
 
     # initialize env and agent
