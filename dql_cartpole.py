@@ -26,19 +26,39 @@ class DQLAgent:
 
     def build_model(self):
         # neural network for deep q learning
-        pass
+        model = keras.Sequential()
+        model.add(Dense(48, input_dim = self.state_size, activation="tanh"))
+        model.add(Dense(self.action_size, activation="linear"))
+        model.compile(loss="mse", optimizer = Adam(learning_rate = self.learning_rate))
+        return model
 
     def remember(self, state, action, reward, next_state, done):
         # storage
-        self.memory.append(state, action, reward, next_state, done)
+        self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state):
         # acting explore or explotation
-        pass
+        if random.uniform(0,1) <= self.epsilon:
+            return env.action_space.sample()
+        else:
+            act_values = self.model.predict(state)
+            return np.argmax(act_values[0])
 
     def replay(self, batch_size):
         # training
-        pass
+        if len(self.memory) < batch_size:
+            return
+
+        minibatch = random.sample(self.memory, batch_size)
+        for state, action, reward, next_state, done in minibatch:
+            if done:
+                target = reward
+            else:
+                target = reward + self.gamma * np.amax(self.model.predict(next_state)[0])
+
+            trained_target = self.model.predict(state)
+            trained_target[0][action] = target
+            self.model.fit(state,trained_target, verbose=0)
 
     def adaptiveEGreedy(self):
         if self.epsilon > self.epsilon_min:
@@ -66,7 +86,7 @@ if __name__ == "__main__":
             action = agent.act(state) #select an action
 
             # step
-            next_state, reward, done, _ = env.step(action)
+            next_state, reward, done, _, _ = env.step(action)
             next_state = np.reshape(next_state, [1,4])
 
             # remember /storage
