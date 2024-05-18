@@ -1,10 +1,15 @@
+import os
 import gym
 import numpy as np
 from collections import deque
 from tensorflow import keras
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
+import tensorflow as tf
 import random
+import logging
+
+logging.disable(logging.WARNING)
 
 class DQLAgent:
 
@@ -12,16 +17,12 @@ class DQLAgent:
         # parameters / hyper parameters
         self.state_size = env.observation_space.shape[0]
         self.action_size = env.action_space.n
-
         self.gamma = 0.95
         self.learning_rate = 0.001
-
         self.epsilon = 1
         self.epsilon_decay = 0.995
         self.epsilon_min = 0.01
-
         self.memory = deque(maxlen=1000)
-
         self.model = self.build_model()
 
     def build_model(self):
@@ -58,7 +59,7 @@ class DQLAgent:
 
             trained_target = self.model.predict(state)
             trained_target[0][action] = target
-            self.model.fit(state,trained_target, verbose=0)
+            self.model.fit(state, trained_target, verbose=0)
 
     def adaptiveEGreedy(self):
         if self.epsilon > self.epsilon_min:
@@ -106,5 +107,25 @@ if __name__ == "__main__":
             if done:
                 print("Episode: {}, time: {}".format(e,time))
                 break
+
+# %% test
+import time
+trained_model = agent
+state, _ = env.reset()
+state = np.reshape(state, (1,-1))
+time_t=0
+while True:
+    env.render()
+    action = trained_model.act(state)
+    next_state, reward, done, _, _ = env.step(action)
+    next_state = np.reshape(next_state, [1, 4])
+    state = next_state
+    time_t +=1
+    print(time_t)
+    time.sleep(0.4)
+    if done:
+        break
+print("Done")
+
 
 
