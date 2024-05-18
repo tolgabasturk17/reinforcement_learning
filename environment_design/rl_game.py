@@ -36,13 +36,13 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
 
 
-    def update(self):
+    def update(self, action):
         self.speedx = 0
         keystate = pygame.key.get_pressed()
 
-        if keystate[pygame.K_LEFT]:
+        if keystate[pygame.K_LEFT] or action == 0:
             self.speedx = -4
-        elif keystate[pygame.K_RIGHT]:
+        elif keystate[pygame.K_RIGHT] or action == 1:
             self.speedx = 4
         else:
             self.speedx = 0
@@ -50,7 +50,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x +=self.speedx
 
         if self.rect.right > WIDTH:
-            self.rect.right = WIDTH;
+            self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
 
@@ -137,23 +137,54 @@ class DQLAgent:
             self.epsilon = self.epsilon * self.epsilon_decay
 
 
+class Env(pygame.sprite.Sprite):
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.all_sprite = pygame.sprite.Group()
+        self.enemy = pygame.sprite.Group()
+        self.player = Player()
+        self.all_sprite.add(self.player)
+        self.enemy1 = Enemy()
+        self.enemy2 = Enemy()
+        self.all_sprite.add(self.enemy1)
+        self.all_sprite.add(self.enemy2)
+        self.enemy.add(self.enemy1)
+        self.enemy.add(self.enemy2)
+
+        self.reward = 0
+        self.total_reward = 0
+        self.done = False
+
+        self.agent = DQLAgent()
+
+    def step(self, action):
+        state_list = []
+
+        # update
+        self.player.update(action)
+        self.enemy.update()
+
+        # get coordinate
+        next_player_state = self.player.getCoordinate()
+        next_m1_state = self.enemy1.getCoordinate()
+        next_m2_state = self.enemy2.getCoordinate()
+        # find distance
+
+    # reset
+    def initialState(self):
+        pass
+
+    def run(self):
+        pass
+
+
 # initialize pygame and create window
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("BASTURK'S FIRST REINFORCEMENT LEARNING GAME")
 clock = pygame.time.Clock()
 
-# sprite
-all_sprite = pygame.sprite.Group()
-enemy = pygame.sprite.Group()
-player = Player()
-enemy1 = Enemy()
-enemy2 = Enemy()
-all_sprite.add(player)
-all_sprite.add(enemy1)
-all_sprite.add(enemy2)
-enemy.add(enemy1)
-enemy.add(enemy2)
 
 # game loop
 running = True
